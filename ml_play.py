@@ -35,26 +35,49 @@ class MLPlay:
             self.ball_served = True
             return "SERVE_TO_LEFT"
         else:
-            if scene_info["ball_speed"][1] > 0 :
-                if scene_info["ball_speed"][0] > 0:
-                    direction = 0
+            if self.side == "1P":
+                if scene_info["ball_speed"][1] > 0 :
+                    if scene_info["ball_speed"][0] > 0:
+                        direction = 0
+                    else :
+                        direction = 1
                 else :
-                    direction = 1
-            else :
-                if scene_info["ball_speed"][0] > 0:
-                    direction = 2
-                else:
-                    direction = 3
-            X = [scene_info["ball"][0], scene_info["ball"][1], direction, scene_info["blocker"][0],scene_info["ball_speed"][0],scene_info["ball_speed"][1]]
-            X = np.array(X).reshape((1,-1))
-            pred = self.model.predict(X)
-            if scene_info["platform_2P"][0]+20  > (pred-10)and scene_info["platform_2P"][0]+20 < (pred+10):
-                if scene_info["platform_2P"][1]+30-scene_info["ball_speed"][1] > scene_info["ball"][1] : #slice
-                    return "NONE"
+                    if scene_info["ball_speed"][0] > 0:
+                        direction = 2
+                    else:
+                        direction = 3
+                X = [scene_info["ball"][0], scene_info["ball"][1], direction, scene_info["ball_speed"][0],scene_info["ball_speed"][1]]
+                X = np.array(X).reshape((1,-1))
+                pred = self.model.predict(X)
+                if scene_info["platform_1P"][0]+20  > (pred-10)and scene_info["platform_1P"][0]+20 < (pred+10):
+                    if scene_info["platform_1P"][1]+30-scene_info["ball_speed"][1] > scene_info["ball"][1] : #slice
+                        return "NONE"
+                    else :
+                        return "NONE" # NONE
+                elif scene_info["platform_1P"][0]+20 <= (pred-10) : return "MOVE_RIGHT" # goes right
+                else : return "MOVE_LEFT" # goes left
+            elif self.side == "2P":
+                if scene_info["ball_speed"][1] > 0 :
+                    if scene_info["ball_speed"][0] > 0:
+                        direction = 0
+                    else :
+                        direction = 1
                 else :
-                    return "NONE" # NONE
-            elif scene_info["platform_2P"][0]+20 <= (pred-10) : return "MOVE_RIGHT" # goes right
-            else : return "MOVE_LEFT" # goes left
+                    if scene_info["ball_speed"][0] > 0:
+                        direction = 2
+                    else:
+                        direction = 3
+                X = [scene_info["ball"][0], scene_info["ball"][1], direction,scene_info["ball_speed"][0],scene_info["ball_speed"][1]]
+                X = np.array(X).reshape((1,-1))
+                pred = self.model.predict(X)
+                if scene_info["platform_2P"][0]+20  > (pred-10)and scene_info["platform_2P"][0]+20 < (pred+10):
+                    if scene_info["platform_2P"][1]+30-scene_info["ball_speed"][1] > scene_info["ball"][1] : #slice
+                        return "NONE"
+                    else :
+                        return "NONE" # NONE
+                elif scene_info["platform_2P"][0]+20 <= (pred-10) : return "MOVE_RIGHT" # goes right
+                else : return "MOVE_LEFT" # goes left
+
 
     def reset(self):
         """
